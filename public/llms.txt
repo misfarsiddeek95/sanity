@@ -1,0 +1,38 @@
+# Scentify Fragrances
+
+> Scentify Fragrances (Pvt) Ltd imports Arabian and designer perfumes directly from the UAE and sells them online in Sri Lanka. Prices are in Sri Lankan rupees (LKR), delivery is island-wide, and Cash on Delivery is available.
+
+## Shop
+- [All fragrances](https://scentifyfragrances.lk/shop): the full catalogue of perfumes and gift sets
+- [Brands](https://scentifyfragrances.lk/brands): Lattafa, Armaf, Afnan, Rasasi, French Avenue, Dior, Chanel and more
+- [Men's](https://scentifyfragrances.lk/category/men), [Women's](https://scentifyfragrances.lk/category/women), [Unisex](https://scentifyfragrances.lk/category/unisex)
+- [Arabian houses](https://scentifyfragrances.lk/category/arabian) and [Designer](https://scentifyfragrances.lk/category/designer)
+- [Gift sets](https://scentifyfragrances.lk/category/gift-sets) and [Gift finder](https://scentifyfragrances.lk/gifts)
+
+## Guides
+- [All perfume guides](https://scentifyfragrances.lk/guides): Arabian perfumes, oud, EDP vs EDT, making fragrance last, perfume for Sri Lankan weather, spotting fake perfume, gift advice, how to order online
+
+## Machine-readable
+- [Full site summary and catalogue](https://scentifyfragrances.lk/llms-full.txt)
+- [Sitemap](https://scentifyfragrances.lk/sitemap.xml)
+- [Guides RSS feed](https://scentifyfragrances.lk/feed.xml)
+
+## Policies and help
+- [Order and delivery](https://scentifyfragrances.lk/delivery): delivery zones, charges, estimated times, free delivery over LKR 15,000, payment options
+- [Return, refund and cancellation policy](https://scentifyfragrances.lk/returns)
+- [FAQs](https://scentifyfragrances.lk/faq): delivery, Cash on Delivery, returns, tracking, fragrance types
+- [About and authenticity](https://scentifyfragrances.lk/about)
+- [Contact](https://scentifyfragrances.lk/contact): WhatsApp, phone and email
+
+## Facts
+- Business: Scentify Fragrances (Pvt) Ltd, Sri Lanka
+- Products: eau de parfum, eau de toilette, extrait de parfum and boxed gift sets
+- Currency: LKR. Payment: Cash on Delivery, bank transfer
+- Service area: all of Sri Lanka
+- Contact: order@scentifyfragrances.lk, WhatsApp and phone 077 005 5732, customer service 9:00 am – 9:00 pm
+- Address: 22C Janatha Mawatha, Huludagoda Rd, Dehiwala-Mount Lavinia, Sri Lanka
+- Instagram: https://www.instagram.com/__scentify__ · TikTok: https://www.tiktok.com/@__scentify__ · Facebook: https://www.facebook.com/profile.php?id=61591826182325
+
+## Legal
+- [Privacy policy](https://scentifyfragrances.lk/privacy), [Terms](https://scentifyfragrances.lk/terms), [Cookie policy](https://scentifyfragrances.lk/cookies), [Disclaimer](https://scentifyfragrances.lk/disclaimer)
+- [Complaints and feedback](https://scentifyfragrances.lk/complaints), [Accessibility](https://scentifyfragrances.lk/accessibility), [Review policy](https://scentifyfragrances.lk/review-policy)

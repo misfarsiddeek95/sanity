@@ -1,0 +1,14 @@
+{
+  "name": "Scentify Fragrances",
+  "short_name": "Scentify",
+  "description": "Arabian and designer perfumes imported from the UAE, delivered across Sri Lanka.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F0E8",
+  "theme_color": "#0A1128",
+  "icons": [
+    { "src": "/brand/favicon-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/brand/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/brand/favicon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" }
+  ]
+}

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>Scentify</ShortName>
+  <Description>Search Scentify Fragrances perfumes</Description>
+  <InputEncoding>UTF-8</InputEncoding>
+  <Image width="32" height="32" type="image/png">https://scentifyfragrances.lk/brand/favicon-32.png</Image>
+  <Url type="text/html" template="https://scentifyfragrances.lk/search?q={searchTerms}"/>
+</OpenSearchDescription>
