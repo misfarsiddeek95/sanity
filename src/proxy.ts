@@ -6,8 +6,12 @@ import { ban, clientIp, isBanned, rateLimit } from "./lib/server/rate-limit";
  * Blocks scanners and exploit probes, enforces the canonical host, method allow-list and rate limits.
  * Heavy volumetric DDoS protection must sit in front (Cloudflare / nginx limit_req); this layer handles abuse that reaches the app.
  */
-const ALLOWED_HOSTS = (process.env.ALLOWED_HOSTS ?? "scentifyfragrances.lk,www.scentifyfragrances.lk,localhost,127.0.0.1")
-  .split(",").map((h) => h.trim().toLowerCase()).filter(Boolean);
+// On Vercel, the deployment's own *.vercel.app hostnames (injected by the platform) must be allowed too, otherwise the site answers 421 until a custom domain is attached.
+const VERCEL_HOSTS = [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL, process.env.VERCEL_PROJECT_PRODUCTION_URL].filter((h): h is string => !!h);
+const ALLOWED_HOSTS = [
+  ...(process.env.ALLOWED_HOSTS ?? "scentifyfragrances.lk,www.scentifyfragrances.lk,localhost,127.0.0.1").split(","),
+  ...VERCEL_HOSTS,
+].map((h) => h.trim().toLowerCase()).filter(Boolean);
 const CANONICAL_HOST = process.env.CANONICAL_HOST ?? "scentifyfragrances.lk";
 
 const BAD_UA = /(sqlmap|nikto|nmap|masscan|zgrab|acunetix|nessus|openvas|havij|dirbuster|gobuster|feroxbuster|wpscan|nuclei|w3af|burp|hydra|jorgee|libwww-perl|zmeu|morfeus|semrushbot|ahrefsbot|mj12bot|dotbot|megaindex|blexbot|serpstatbot|dataforseo)/i;
