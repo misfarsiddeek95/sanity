@@ -29,8 +29,7 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, them
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en-LK" className={`${montserrat.variable} ${cormorant.variable} ${cinzel.variable}`}>
-      {/* Browser extensions (e.g. Grammarly) inject attributes into <body> before hydration. */}
-      <body suppressHydrationWarning>
+      <body>
         <noscript><style>{".reveal{opacity:1!important;transform:none!important}"}</style></noscript>
         <JsonLd data={ORG_SCHEMA} />
         <div id="root"><AppShell>{children}</AppShell></div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "../lib/router";
+import { STORE } from "../data/config";
 import { BRANDS, CATEGORIES, COLLECTIONS, IMG, PRODUCTS, getProduct, px } from "../data/products";
 import { BUNDLE, FREE_DELIVERY_THRESHOLD, PROMOS } from "../data/config";
 import { lkr, hasOffer } from "../lib/pricing";
@@ -148,7 +149,7 @@ function Categories() {
       <Container className="relative">
         <SectionHeading eyebrow="Shop by category" title="Eight ways into the Scentify range" center oneLine />
         <ul className="section-body grid grid-cols-2 gap-x-5 gap-y-14 sm:grid-cols-4 lg:grid-cols-8">
-          {CATEGORIES.map((c, i) => (
+          {CATEGORIES.filter((c) => c.slug !== "pre-order").map((c, i) => (
             <Reveal as="li" key={c.slug} delay={i * 70}>
               <Link to={`/category/${c.slug}`} className="group block text-center">
                 <div className="arch-frame mx-1.5">
@@ -161,6 +162,32 @@ function Categories() {
             </Reveal>
           ))}
         </ul>
+      </Container>
+    </section>
+  );
+}
+
+function DesignerPreorders() {
+  const items = ["chanel-bleu-de-chanel", "dior-sauvage", "versace-eros", "tom-ford-ombre-leather"]
+    .map((slug) => PRODUCTS.find((p) => p.slug === slug))
+    .filter((p): p is (typeof PRODUCTS)[number] => !!p);
+  const count = PRODUCTS.filter((p) => p.preorder).length;
+  return (
+    <section className="section-y bg-sand-2" aria-label="Designer pre-orders" id="designer-preorder">
+      <Container>
+        <SectionHeading
+          eyebrow="Designer · Pre-order"
+          title="Designer fragrances, on request"
+          sub={`${count} designer fragrances from Chanel, Dior, Versace, Valentino and more. Message us, and we confirm the price and arrival before you pay.`}
+          link={{ to: "/category/pre-order", label: `All ${count} pre-orders` }}
+        />
+        <div className="section-body"><ProductGrid items={items} /></div>
+        <div className="mt-12 flex flex-col items-center justify-center gap-3 border border-gold-dk/40 bg-white/60 p-6 text-center sm:flex-row sm:text-left">
+          <p className="flex-1 text-[15px] text-mute">Can&apos;t see the designer scent you want? Tell us the name and size and we will source it.</p>
+          <a href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent("Hello Scentify! I'd like to pre-order a designer fragrance: ")}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-ink px-6 py-3.5 text-[11px] font-medium uppercase tracking-[0.2em] text-sand transition hover:bg-gold hover:text-ink">
+            <Icon name="whatsapp" className="h-4 w-4" /> Ask on WhatsApp
+          </a>
+        </div>
       </Container>
     </section>
   );
@@ -402,6 +429,7 @@ export default function Home() {
           <div className="section-body"><ProductGrid items={best} /></div>
         </Container>
       </section>
+      <DesignerPreorders />
       <Journey />
       <Offers />
       <section className="section-y section-standalone">

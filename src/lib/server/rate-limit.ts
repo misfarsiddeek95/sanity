@@ -41,8 +41,6 @@ export function isBanned(key: string) {
 
 /** Client IP. Behind nginx/Cloudflare the proxy must set (and overwrite) one of these headers; see README. */
 export function clientIp(h: Headers): string {
-  // On Vercel the platform sets these itself; cf-connecting-ip would be client-controlled there and trivially spoofed.
-  if (process.env.VERCEL) return (h.get("x-vercel-forwarded-for") || h.get("x-real-ip") || h.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown").slice(0, 64);
   return (
     h.get("cf-connecting-ip") ||
     h.get("x-real-ip") ||

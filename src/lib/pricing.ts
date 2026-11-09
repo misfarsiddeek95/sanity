@@ -7,6 +7,10 @@ export const lkr = (n: number) => `LKR ${Math.round(n).toLocaleString("en-LK")}`
 export type CartLine = { pid: string; size: string; qty: number };
 export const lineKey = (l: { pid: string; size: string }) => `${l.pid}__${l.size}`;
 
+export const isPreorder = (p: Product) => !!p.preorder;
+/** Out of stock, excluding pre-order items (those are never "sold out", they are reserved on request). */
+export const soldOut = (p: Product) => !p.preorder && totalStock(p) === 0;
+export const PREORDER_PRICE = "Price on request";
 export const fromPrice = (p: Product) => Math.min(...p.variants.map((v) => v.price));
 export const totalStock = (p: Product) => p.variants.reduce((s, v) => s + v.stock, 0);
 export const discountPct = (p: Product) => {

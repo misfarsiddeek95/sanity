@@ -42,10 +42,12 @@ export function productMeta(slug: string): Metadata {
   const p = getProduct(slug);
   if (!p) return buildMetadata({ title: "Product not found", description: "Product not found.", path: `/product/${slug}`, noindex: true });
   const b = brandName(p.brand);
-  const title = [`${b} ${p.name} ${p.concentration} | Buy in Sri Lanka`, `${b} ${p.name} ${p.concentration}`, `${b} ${p.name}`].find((t) => t.length <= 56) ?? `${b} ${p.name}`;
+  const title = [`${b} ${p.name} ${p.concentration} | ${p.preorder ? "Pre-order" : "Buy"} in Sri Lanka`, `${b} ${p.name} ${p.concentration}`, `${b} ${p.name}`].find((t) => t.length <= 56) ?? `${b} ${p.name}`;
   return buildMetadata({
     title, image: p.images[0], type: "product", path: `/product/${slug}`,
-    description: `Buy ${p.name} by ${b} (${p.concentration}, ${p.variants.map((x) => x.size).join(" / ")}) in Sri Lanka. Imported from the UAE. Prices in LKR; Cash on Delivery. Island-wide delivery.`,
+    description: p.preorder
+      ? `Pre-order ${b} ${p.name} ${p.concentration === "Fragrance" ? "" : p.concentration} in Sri Lanka. Message Scentify on WhatsApp for the price and expected arrival. Island-wide delivery.`.replace(/\s+/g, " ")
+      : `Buy ${p.name} by ${b} (${p.concentration}, ${p.variants.map((x) => x.size).join(" / ")}) in Sri Lanka. Imported from the UAE. Prices in LKR; Cash on Delivery. Island-wide delivery.`,
   });
 }
 

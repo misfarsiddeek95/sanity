@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, navigate } from "../lib/router";
 import { CATEGORIES, PRODUCTS, brandName, getProduct, type Product } from "../data/products";
 import { DISTRICTS, FREE_DELIVERY_THRESHOLD, STORE, zoneForDistrict } from "../data/config";
-import { discountPct, fromPrice, lkr, totalStock } from "../lib/pricing";
+import { discountPct, fromPrice, lkr, soldOut, totalStock } from "../lib/pricing";
 import { useStore } from "../store";
 import { absUrl } from "../lib/seo";
 import { track } from "../lib/analytics";
@@ -74,7 +74,8 @@ export function ProductPage({ slug }: { slug: string }) {
   }, [p?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const v = p?.variants.find((x) => x.size === size) ?? p?.variants[0];
-  const out = p ? totalStock(p) === 0 : false;
+  const out = p ? soldOut(p) : false;
+  const pre = !!p?.preorder;
   const cat = p ? CATEGORIES.find((c) => c.test(p) && !["men", "women", "unisex"].includes(c.slug)) : undefined;
 
   useEffect(() => {
@@ -97,7 +98,9 @@ export function ProductPage({ slug }: { slug: string }) {
   const pct = discountPct(p);
   const zone = district ? zoneForDistrict(district) : undefined;
   const lowStock = v.stock > 0 && v.stock <= 3;
-  const wa = encodeURIComponent(`Hello Scentify! I'm interested in ${p.name} (${v.size}) — ${absUrl(`/product/${p.slug}`)}`);
+  const sizeTxt = /^on request$/i.test(v.size) ? "" : ` (${v.size})`;
+  const wa = encodeURIComponent(`Hello Scentify! I'm interested in ${p.name}${sizeTxt} — ${absUrl(`/product/${p.slug}`)}`);
+  const waPre = encodeURIComponent(`Hello Scentify! I'd like to pre-order ${brandName(p.brand)} ${p.name}${p.concentration === "Fragrance" ? "" : ` ${p.concentration}`}${sizeTxt}. Could you confirm the price and expected arrival? ${absUrl(`/product/${p.slug}`)}`);
 
   const notify = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,8 +118,9 @@ export function ProductPage({ slug }: { slug: string }) {
         <Gallery key={p.id} p={p} />
         <div className="lg:self-center">
           <div className="flex flex-wrap items-center gap-2">
+            {pre && <Chip tone="gold">Pre-order</Chip>}
             {out ? <Chip tone="dark">Sold out</Chip> : null}
-            {pct > 0 && !out && <Chip tone="clay">Save {pct}%</Chip>}
+            {pct > 0 && !out && !pre && <Chip tone="clay">Save {pct}%</Chip>}
             {p.isNew && <Chip tone="gold">New</Chip>}
             {p.isBest && <Chip tone="dark">Bestseller</Chip>}
           </div>
@@ -125,6 +129,32 @@ export function ProductPage({ slug }: { slug: string }) {
           <p className="mt-3 text-[14px] text-mute">{p.concentration} · {p.variants.map((x) => x.size).join(" / ")} · {p.gender === "unisex" ? "Unisex" : p.gender === "men" ? "For men" : "For women"}</p>
           <div className="mt-6"><Price product={p} variant={v} size="lg" /></div>
           
+          {pre ? (
+            <div className="mt-8 border border-gold-dk/40 bg-sand-2 p-5 sm:p-6">
+              <p className="font-display text-[24px] leading-tight">Available to pre-order</p>
+              <p className="mt-2 text-[14px] leading-relaxed text-mute">
+                We bring this designer fragrance in on request. Message us and we will confirm the price, size and expected arrival on WhatsApp. No payment now.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <a
+                  href={`https://wa.me/${STORE.whatsapp}?text=${waPre}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => track("preorder_click", { item_id: p.id, item_name: p.name, source: "product" })}
+                  className="inline-flex min-w-[200px] flex-1 items-center justify-center gap-2 bg-ink px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] text-sand transition hover:bg-gold hover:text-ink"
+                >
+                  <Icon name="whatsapp" className="h-4 w-4" /> Pre-order on WhatsApp
+                </a>
+                <a href={`tel:${STORE.phoneTel}`} className="inline-flex items-center justify-center gap-2 border border-ink px-6 py-4 text-[11px] font-medium uppercase tracking-[0.2em] transition hover:bg-ink hover:text-sand">
+                  <Icon name="phone" className="h-4 w-4" /> Call {STORE.phoneDisplay}
+                </a>
+              </div>
+              <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-1 text-[12px] text-mute" aria-label="Pre-order assurances">
+                {["Price confirmed before you pay", "Authentic designer fragrance", "Island-wide delivery"].map((t) => <li key={t} className="flex items-center gap-1.5"><Icon name="check" className="h-3.5 w-3.5 text-jade" />{t}</li>)}
+              </ul>
+            </div>
+          ) : (
+          <>
           <fieldset className="mt-8">
             <legend className="text-[11px] font-medium uppercase tracking-[0.22em]">Size — <span className="normal-case tracking-normal text-mute">{v.size}</span></legend>
             <div className="mt-3 flex flex-wrap gap-3">
@@ -175,6 +205,9 @@ export function ProductPage({ slug }: { slug: string }) {
             </ul>
           )}
 
+          </>
+          )}
+
           <div className="mt-5 flex flex-wrap gap-x-6 gap-y-3 text-[12px] font-medium uppercase tracking-[0.15em]">
             <button onClick={() => toggleWish(p.id)} aria-pressed={wished} className="flex items-center gap-2 hover:text-gold-dk"><Icon name="heart" className="h-4 w-4" fill={wished} /> {wished ? "Saved" : "Add to wishlist"}</button>
             <button onClick={() => toggleCompare(p.id)} aria-pressed={compared} className="flex items-center gap-2 hover:text-gold-dk"><Icon name="compare" className="h-4 w-4" /> {compared ? "Added to compare" : "Compare"}</button>
@@ -216,7 +249,7 @@ export function ProductPage({ slug }: { slug: string }) {
                 <dt className="text-ink">Brand</dt><dd>{brandName(p.brand)}</dd>
                 <dt className="text-ink">Concentration</dt><dd>{p.concentration}</dd>
                 <dt className="text-ink">Available sizes</dt><dd>{p.variants.map((x) => x.size).join(", ")}</dd>
-                <dt className="text-ink">Origin</dt><dd>Imported from the UAE</dd>
+                <dt className="text-ink">Origin</dt><dd>{pre ? "Imported on pre-order" : "Imported from the UAE"}</dd>
                 {p.longevity && <><dt className="text-ink">Longevity</dt><dd>{p.longevity}</dd></>}
               </dl>
             </div>
@@ -302,12 +335,12 @@ export function ComparePage() {
     );
   const rows: [string, (p: Product) => React.ReactNode][] = [
     ["Brand", (p) => brandName(p.brand)],
-    ["From", (p) => lkr(fromPrice(p))],
+    ["From", (p) => (p.preorder ? "On request" : lkr(fromPrice(p)))],
     ["Concentration", (p) => p.concentration],
         ["Gender", (p) => p.gender],
     ["Sizes", (p) => p.variants.map((v) => v.size).join(", ")],
                 ["Longevity", (p) => p.longevity ?? "Ask us"],
-    ["Availability", (p) => (totalStock(p) ? "In stock" : "Sold out")],
+    ["Availability", (p) => (p.preorder ? "Pre-order" : totalStock(p) ? "In stock" : "Sold out")],
   ];
   return (
     <Container className="section-y">

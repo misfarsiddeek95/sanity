@@ -143,6 +143,7 @@ export function Delivery() {
           <h2>Payment options</h2>
           <ul>{PAYMENTS.map((p) => <li key={p.id}><strong>{p.name}</strong> — {p.desc} {p.note}</li>)}</ul>
           <h2>Processing & tracking</h2>
+          <p><strong>Designer pre-orders:</strong> message us on WhatsApp and we confirm the price and expected arrival before you pay anything. Pre-order fragrances are not added to the cart.</p>
           <p>We confirm every order by phone or WhatsApp, then pack it and hand it to our delivery partner. You can <Link to="/track">track your order</Link> at any time.</p>
         </Prose>
       </Container>

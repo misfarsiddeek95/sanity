@@ -25,12 +25,13 @@ export const productLd = (p: Product) => ({
   "@context": CTX, "@type": "Product", name: p.name,
   brand: { "@type": "Brand", name: brandName(p.brand) },
   image: p.images.map(absUrl), sku: p.id, url: absUrl(`/product/${p.slug}`), description: p.description, category: p.concentration,
-  offers: p.variants.map((x) => ({
+  // Pre-order items have no confirmed price: no Offer, so we never publish an invented price to search engines
+  ...(p.preorder ? {} : { offers: p.variants.map((x) => ({
     "@type": "Offer", priceCurrency: "LKR", price: x.price,
     availability: x.stock > 0 ? `${CTX}/InStock` : `${CTX}/OutOfStock`,
     itemCondition: `${CTX}/NewCondition`, name: x.size, url: absUrl(`/product/${p.slug}`),
     seller: { "@type": "Organization", name: "Scentify Fragrances" },
-  })),
+  })) }),
 });
 
 export const guideLd = (g: Guide) => [

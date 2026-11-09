@@ -4,13 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { track } from "../lib/analytics";
 import { Link, useLocation } from "../lib/router";
 import { BRANDS, CATEGORIES, COLLECTIONS, PRODUCTS, brandName, getBrand, type Product } from "../data/products";
-import { fromPrice, hasOffer, lkr, totalStock } from "../lib/pricing";
+import { fromPrice, hasOffer, lkr, soldOut } from "../lib/pricing";
 import { Button, Container, Drawer, EmptyState, Icon, PageHero, Reveal, Photo } from "../components/ui";
 import { ProductGrid } from "../components/shop";
 import { cn } from "../utils/cn";
 
-type Filters = { brands: string[]; families: string[]; genders: string[]; sizes: string[]; price: string; stock: boolean; offer: boolean };
-const EMPTY: Filters = { brands: [], families: [], genders: [], sizes: [], price: "any", stock: false, offer: false };
+type Filters = { brands: string[]; families: string[]; genders: string[]; sizes: string[]; price: string; stock: boolean; offer: boolean; pre: boolean };
+const EMPTY: Filters = { brands: [], families: [], genders: [], sizes: [], price: "any", stock: false, offer: false, pre: false };
 const BANDS = [
   { id: "any", label: "Any price", min: 0, max: Infinity },
   { id: "a", label: "Under LKR 10,000", min: 0, max: 10000 },
@@ -34,6 +34,8 @@ function applyFilters(items: Product[], f: Filters) {
     if (f.brands.length && !f.brands.includes(p.brand)) return false;
     if (f.families.length && !f.families.includes(p.concentration)) return false;
     if (f.genders.length && !f.genders.includes(p.gender)) return false;
+    if (f.pre && !p.preorder) return false;
+    if (p.preorder && (f.price !== "any" || f.stock)) return false; // no price or stock to match against
     const vs = p.variants.filter((v) => (!f.sizes.length || f.sizes.includes(v.size)) && (!f.stock || v.stock > 0) && v.price >= band.min && v.price < band.max);
     if (!vs.length) return false;
     if (f.offer && !hasOffer(p)) return false;
@@ -100,6 +102,7 @@ function FilterPanel({ base, f, set, hideBrand, hideGender }: { base: Product[];
       <Group title="Availability">
         <Check label="In stock only" checked={f.stock} onChange={() => set({ ...f, stock: !f.stock })} />
         <Check label="On offer" checked={f.offer} onChange={() => set({ ...f, offer: !f.offer })} />
+        <Check label="Pre-order" checked={f.pre} onChange={() => set({ ...f, pre: !f.pre })} count={count((p) => !!p.preorder)} />
       </Group>
     </div>
   );
@@ -127,10 +130,11 @@ function Catalog({ title, eyebrow, blurb, crumbs, items, q, defaultSort = "featu
     const out = applyFilters(items, f).slice();
     if (sort === "newest") out.sort((a, b) => b.added - a.added);
     if (sort === "best") out.sort((a, b) => Number(b.isBest) - Number(a.isBest));
-    if (sort === "low") out.sort((a, b) => fromPrice(a) - fromPrice(b));
-    if (sort === "high") out.sort((a, b) => fromPrice(b) - fromPrice(a));
+    const priced = (a: Product, b: Product) => Number(!!a.preorder) - Number(!!b.preorder); // pre-orders have no price: list them last
+    if (sort === "low") out.sort((a, b) => priced(a, b) || fromPrice(a) - fromPrice(b));
+    if (sort === "high") out.sort((a, b) => priced(a, b) || fromPrice(b) - fromPrice(a));
     if (sort === "az") out.sort((a, b) => a.name.localeCompare(b.name));
-    if (sort === "featured") out.sort((a, b) => Number(totalStock(b) > 0) - Number(totalStock(a) > 0));
+    if (sort === "featured") out.sort((a, b) => Number(!soldOut(b)) - Number(!soldOut(a)));
     return out;
   }, [items, f, sort]);
 

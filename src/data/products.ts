@@ -33,6 +33,7 @@ export type Product = {
   longevity?: string; // only set when verified
   includes?: string[]; // gift sets
   added: number; // sort order for "newest"
+  preorder?: boolean; // reserved on request: no price, stock or cart; ordered via WhatsApp
 };
 
 /* Brand photography (supplied by Scentify). px(id) keeps the old call sites working:
@@ -93,6 +94,18 @@ const BRAND_DEFS: Record<string, BrandDef> = {
   REEF: { name: "Reef", tier: "arabian", base: 10500, strip: ["Reef "], image: phAttars },
   RIFFZ: { name: "Riffz", tier: "arabian", base: 9500, image: phAmber },
   VERSACE: { name: "Versace", tier: "designer", base: 23500, strip: ["Versace "], image: phBoutique },
+  DUNHILL: { name: "Dunhill", tier: "designer", base: 0, strip: ["Dunhill "], image: phAmber },
+  "HUGO BOSS": { name: "Hugo Boss", tier: "designer", base: 0, strip: ["Hugo Boss "], image: phBoutique },
+  "CALVIN KLEIN": { name: "Calvin Klein", tier: "designer", base: 0, strip: ["CK "], image: phSmoke },
+  "RUE BROCA": { name: "Rue Broca", tier: "designer", base: 0, strip: ["Rue Broca "], image: phSmoke },
+  SOSPIRO: { name: "Sospiro", tier: "designer", base: 0, strip: ["Sospiro "], image: phOud },
+  PRADA: { name: "Prada", tier: "designer", base: 0, strip: ["Prada "], image: phAmber },
+  "JEAN PAUL GAULTIER": { name: "Jean Paul Gaultier", tier: "designer", base: 0, strip: ["Jean Paul Gaultier "], image: phBoutique },
+  "CAROLINA HERRERA": { name: "Carolina Herrera", tier: "designer", base: 0, strip: ["Carolina Herrera "], image: phBoutique },
+  "TOM FORD": { name: "Tom Ford", tier: "designer", base: 0, strip: ["Tom Ford "], image: phSmoke },
+  MANCERA: { name: "Mancera", tier: "designer", base: 0, strip: ["Mancera "], image: phOud },
+  VALENTINO: { name: "Valentino", tier: "designer", base: 0, strip: ["Valentino "], image: phAmber },
+  "VIKTOR & ROLF": { name: "Viktor & Rolf", tier: "designer", base: 0, strip: ["Viktor & Rolf "], image: phSmoke },
   "IBRAHIM AL QURASHI": { name: "Ibrahim Al Qurashi", tier: "arabian", base: 12000, strip: ["Ibrahim Al Qurashi "], image: phOud },
 };
 const slugify = (s: string) => s.toLowerCase().replace(/&/g, "and").replace(/[’']/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -104,8 +117,8 @@ export const BRANDS: Brand[] = Object.values(BRAND_DEFS)
 export const getBrand = (slug: string) => BRANDS.find((b) => b.slug === slug);
 export const brandName = (slug: string) => getBrand(slug)?.name ?? slug;
 
-const CONC: Record<CatRow["type"], string> = { EDP: "Eau de Parfum", EDT: "Eau de Toilette", Extrait: "Extrait de Parfum", Parfum: "Parfum", SET: "Gift set" };
-const CONC_MULT: Record<CatRow["type"], number> = { EDP: 1, EDT: 0.9, Extrait: 1.6, Parfum: 1.3, SET: 1 };
+const CONC: Record<CatRow["type"], string> = { EDP: "Eau de Parfum", EDT: "Eau de Toilette", Extrait: "Extrait de Parfum", Parfum: "Parfum", SET: "Gift set", Fragrance: "Fragrance" };
+const CONC_MULT: Record<CatRow["type"], number> = { EDP: 1, EDT: 0.9, Extrait: 1.6, Parfum: 1.3, SET: 1, Fragrance: 1 };
 const SET_PRICE: Record<number, number> = { 1: 14500, 2: 13500, 3: 19500, 4: 31500, 5: 17500, 6: 12500 };
 const round = (n: number) => Math.round(n / 50) * 50;
 
@@ -159,8 +172,9 @@ CATALOGUE.forEach((r) => {
   const ml = parseInt(r.size, 10);
   const base = isSet ? SET_PRICE[r.n] : def.base * CONC_MULT[r.type] * (ml && ml < 100 && r.type !== "Extrait" ? 0.8 : ml > 100 ? 1.05 : 1);
   const pct = OFFER[r.n] ?? 0;
-  const price = round(base);
-  const variant: Variant = { size: r.size, price, was: pct ? round((price * 100) / (100 - pct)) : undefined, stock: 10 };
+  const pre = !!r.pre;
+  const price = pre ? 0 : round(base); // pre-order prices are quoted on WhatsApp: never show an invented number
+  const variant: Variant = pre ? { size: r.size, price: 0, stock: 0 } : { size: r.size, price, was: pct ? round((price * 100) / (100 - pct)) : undefined, stock: 10 };
   const existing = grouped.get(gkey);
   if (existing) { existing.variants.push(variant); return; }
   const gender: Gender = r.gender === "Men" ? "men" : r.gender === "Women" ? "women" : "unisex";
@@ -176,11 +190,14 @@ CATALOGUE.forEach((r) => {
     concentration: CONC[r.type],
     variants: [variant],
     images: [0, 1, 2].map((k) => pool[(isSet ? k : r.n + k) % pool.length]),
-    description: isSet
+    description: r.pre
+      ? `${def.name} ${name}${r.type === "Fragrance" ? "" : ` ${CONC[r.type]}`} is available to pre-order from Scentify. Message us on WhatsApp and we confirm the price, size and expected arrival before you pay anything. Island-wide delivery across Sri Lanka.`
+      : isSet
       ? `${def.name} ${name} is a ${r.size} fragrance set, imported from the UAE and ready to gift. Order online in Sri Lanka with island-wide delivery and Cash on Delivery.`
       : `${def.name} ${name} is ${/^[aeiou]/i.test(CONC[r.type]) ? "an" : "a"} ${CONC[r.type]} (${r.size}) for ${r.gender === "Unisex" ? "men and women" : r.gender.toLowerCase()}, imported from the UAE. Order it online in Sri Lanka with island-wide delivery and Cash on Delivery, or message us on WhatsApp if you would like help choosing.`,
-    isNew: NEW.has(r.n),
-    isBest: BEST.has(r.n),
+    isNew: !r.pre && NEW.has(r.n),
+    isBest: !r.pre && BEST.has(r.n),
+    preorder: pre || undefined,
     includes,
     added: r.n,
   });
@@ -198,7 +215,8 @@ export const CATEGORIES: Category[] = [
   { slug: "men", label: "Men's", blurb: "Fragrances for him, from Arabian houses and designer icons.", image: phSmoke, test: (p) => p.gender === "men" && p.kind !== "gift" },
   { slug: "women", label: "Women's", blurb: "Fragrances for her, from Lattafa, Armaf, Rasasi and more.", image: phAmber, test: (p) => p.gender === "women" && p.kind !== "gift" },
   { slug: "unisex", label: "Unisex", blurb: "Fragrances made to be shared.", image: phAttars, test: (p) => p.gender === "unisex" && p.kind !== "gift" },
-  { slug: "designer", label: "Designer", blurb: "Chanel, Dior, Versace, Armani and other international houses.", image: phBoutique, test: (p) => p.kind !== "gift" && isDesigner(p) },
+  { slug: "designer", label: "Designer", blurb: "Chanel, Dior, Versace, Armani, Valentino and other international houses. Designer fragrances are available to pre-order.", image: phBoutique, test: (p) => p.kind !== "gift" && isDesigner(p) },
+  { slug: "pre-order", label: "Designer Pre-orders", blurb: "Reserve the designer fragrances you love. Message us on WhatsApp and we confirm price and arrival before you pay.", image: phBoutique, test: (p) => !!p.preorder },
   { slug: "arabian", label: "Arabian Houses", blurb: "Lattafa, Armaf, Afnan, Rasasi, French Avenue and more from the UAE.", image: phOud, test: (p) => p.kind !== "gift" && !isDesigner(p) },
   { slug: "oud", label: "Arabian Oud", blurb: "Every oud-named fragrance in our range.", image: phOud, test: isOud },
   { slug: "extrait", label: "Extrait & Parfum", blurb: "Higher-concentration extrait de parfum and parfum.", image: phAmber, test: (p) => /extrait|^parfum/i.test(p.concentration) },

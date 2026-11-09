@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "../lib/router";
 import { brandName, getProduct, type Product } from "../data/products";
-import { discountPct, totalStock, lkr } from "../lib/pricing";
+import { discountPct, soldOut, lkr } from "../lib/pricing";
+import { track } from "../lib/analytics";
 import { useStore } from "../store";
 import { STORE } from "../data/config";
 import { Chip, Icon, Price, Reveal, Button, Photo } from "./ui";
@@ -11,7 +12,8 @@ import { cn } from "../utils/cn";
 
 export function ProductCard({ p, i = 0 }: { p: Product; i?: number }) {
   const { wishlist, toggleWish, compare, toggleCompare, addToCart } = useStore();
-  const out = totalStock(p) === 0;
+  const pre = !!p.preorder;
+  const out = soldOut(p);
   const pct = discountPct(p);
   const wished = wishlist.includes(p.id);
   const compared = compare.includes(p.id);
@@ -36,9 +38,10 @@ export function ProductCard({ p, i = 0 }: { p: Product; i?: number }) {
             </Link>
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-ink/35 to-transparent opacity-0 transition group-hover:opacity-100" />
             <div className="absolute bottom-3 left-3 flex flex-col items-start gap-1.5">
+              {pre && <Chip tone="gold">Pre-order</Chip>}
               {out && <Chip tone="dark">Sold out</Chip>}
-              {!out && pct > 0 && <Chip tone="clay">−{pct}%</Chip>}
-              {!out && p.isNew && <Chip tone="gold">New</Chip>}
+              {!out && !pre && pct > 0 && <Chip tone="clay">−{pct}%</Chip>}
+              {!out && !pre && p.isNew && <Chip tone="gold">New</Chip>}
               {!out && p.isBest && !p.isNew && pct === 0 && <Chip tone="dark">Bestseller</Chip>}
               {low && <Chip tone="line">Only {first!.stock} left</Chip>}
             </div>
@@ -60,7 +63,18 @@ export function ProductCard({ p, i = 0 }: { p: Product; i?: number }) {
                 <Icon name="compare" className="h-[18px] w-[18px]" />
               </button>
             </div>
-            {!out && first && (
+            {pre && (
+              <a
+                href={`https://wa.me/${STORE.whatsapp}?text=${encodeURIComponent(`Hello Scentify! I'd like to pre-order ${brandName(p.brand)} ${p.name} ${p.concentration === "Fragrance" ? "" : p.concentration}`.replace(/\s+/g, " "))}`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => track("preorder_click", { item_id: p.id, item_name: p.name, source: "card" })}
+                className="absolute inset-x-6 bottom-4 hidden translate-y-6 bg-ink/95 py-3 text-center text-[10.5px] font-medium uppercase tracking-[0.2em] text-sand opacity-0 backdrop-blur transition duration-500 hover:bg-gold hover:text-ink group-hover:translate-y-0 group-hover:opacity-100 focus-visible:translate-y-0 focus-visible:opacity-100 md:block"
+              >
+                Pre-order on WhatsApp
+              </a>
+            )}
+            {!out && !pre && first && (
               <button
                 onClick={() => addToCart(p.id, first.size)}
                 className="absolute inset-x-6 bottom-4 hidden translate-y-6 bg-ink/95 py-3 text-[10.5px] font-medium uppercase tracking-[0.2em] text-sand opacity-0 backdrop-blur transition duration-500 hover:bg-gold hover:text-ink group-hover:translate-y-0 group-hover:opacity-100 focus-visible:translate-y-0 focus-visible:opacity-100 md:block"

@@ -12,5 +12,6 @@ export const FAQS: [string, string][] = [
   ["How do I track my order?", "Use the Track Order page with your order number and phone number or email. You can also message us on WhatsApp."],
   ["Do you offer gift wrapping or gift sets?", "We offer boxed gift sets and a gift finder to help you choose. Ask us on WhatsApp for special gifting requests."],
   ["How do I use a promo code?", "Enter your code in the cart or checkout summary. Only one promo code can be used per order, and some codes have minimum spends."],
+  ["How do designer pre-orders work?", "Designer fragrances such as Chanel, Dior, Versace and Valentino are brought in on request. Message us on WhatsApp with the fragrance you want. We confirm the price, size and expected arrival first, and you only pay once you are happy with those details."],
   ["What if an item is out of stock?", "Out-of-stock sizes are marked on the product page. Use “Notify me” to get an alert when the size is back, or ask us on WhatsApp."],
 ];

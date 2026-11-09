@@ -283,6 +283,7 @@ export function SelectField({ label, error, className, children, ...rest }: { la
 export function Price({ product, size = "md", variant }: { product: Product; size?: "sm" | "md" | "lg"; variant?: { price: number; was?: number } }) {
   const v = variant ?? product.variants.reduce((a, b) => (b.price < a.price ? b : a));
   const cls = size === "lg" ? "text-[26px]" : size === "sm" ? "text-[13px]" : "text-[15px]";
+  if (product.preorder) return <span className={cn("font-medium text-ink", size === "lg" ? "text-[22px]" : cls)}>Price on request</span>;
   return (
     <span className={cn("inline-flex flex-wrap items-baseline gap-2 font-medium", cls)}>
       {!variant && product.variants.length > 1 && <span className="text-[11px] font-normal uppercase tracking-wider text-mute">From</span>}
